@@ -24,13 +24,13 @@ int main() {
 
         attron(A_DIM);
         border(0,0,0,0,0,0,0,0);
-        mvprintw(0, 2, " Cnote ");
+        mvprintw(0, 40, " Cnote ");
         attroff(A_DIM);
 
         viewNotes();
 
-        mvprintw(BOX_H + 2, 0, "[1]Add [2]Refresh [3]Clear [4]Exit");
-        mvprintw(BOX_H + 4, 0, "Choice: ");
+        mvprintw(BOX_H + 5, 1, "[1]Add [2]Refresh [3]Clear [4]Exit");
+        mvprintw(BOX_H + 10, 1, "Choice: ");
         refresh();
 
         echo();
@@ -50,7 +50,7 @@ int main() {
                 clearNotes();
                 break;
             case 4:
-                printf("Have a nice day! :D\n");
+                printf("Closing...\n");
                 break;
             default:
                 printf("Invalid choice\n");
@@ -64,16 +64,16 @@ int main() {
 void viewNotes() {
     FILE *file = fopen("notes.txt", "r");
     if (!file) {
-        mvprintw(2, 3, "No notes found...");
+        mvprintw(2, 5, "No notes found...");
         return;
     }
 
-    char line[256];
-    int row = 2;
+    char line[200];
+    int row = 5;
     
     while (fgets(line, sizeof(line), file) && row < BOX_H) {
         line[strcspn(line, "\n")] = 0;
-        mvprintw(row++, 3, "%.55s", line);
+        mvprintw(row++, 1, "%.55s", line);
     }
     fclose(file);
 }
@@ -83,7 +83,7 @@ void addNotes() {
     curs_set(1);
     char note[100];
 
-    mvprintw(BOX_H + 6, 0, "Enter note: ");
+    mvprintw(BOX_H + 6, 1, "Enter note: ");
     getnstr(note, sizeof(note) - 1);
 
     FILE *file = fopen("notes.txt", "a");
@@ -95,19 +95,19 @@ void addNotes() {
         fclose(file);
     }
 
-    mvprintw(BOX_H + 7, 0, "Saved! [press any key]");
+    mvprintw(BOX_H + 7, 1, "Saved! [press any key]");
     noecho();
     curs_set(0);
     getch();
 }
 
 void clearNotes() {
-    mvprintw(BOX_H + 6, 0, "Clear all notes? [y/n]: ");
+    mvprintw(BOX_H + 6, 1, "Clear all notes? [y/n]: ");
     int ch = getch();
     if (ch == 'y' || ch == 'Y') {
         FILE *file = fopen("notes.txt", "w");
         if (file) fclose(file);
-        mvprintw(BOX_H + 7, 0, "Cleared! [press any key]");
+        mvprintw(BOX_H + 7, 1, "Cleared! [press any key]");
     }
     getch();
 }
