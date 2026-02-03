@@ -1,17 +1,25 @@
 #include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <ncurses.h>
+#include <unistd.h>
 
 #define BOX_W 60
 #define BOX_H 10
 
-void addNotes();
+void addNotes(char *flag);
 void viewNotes();
 void clearNotes();
 
-int main() {
+int main(int argc, char **argv) {
+    int opt = 0;
+    
+    while ((opt = getopt(argc, argv, "a:")) != -1) {
+        addNotes(optarg);
+        return 0;
+    }
+
     initscr();
     cbreak();
     noecho();
@@ -42,7 +50,7 @@ int main() {
 
         switch (choice) {
             case 1:
-                addNotes();
+                addNotes(NULL);
                 break;
             case 2:
                 break;
@@ -78,13 +86,17 @@ void viewNotes() {
     fclose(file);
 }
 
-void addNotes() {
-    echo();
-    curs_set(1);
+void addNotes(char *flag) {
     char note[100];
-
-    mvprintw(BOX_H + 6, 1, "Enter note: ");
-    getnstr(note, sizeof(note) - 1);
+    
+    if (flag != NULL) {
+        strncpy(note, flag, sizeof(note) - 1);
+    } else {
+        echo();
+        curs_set(1);
+        mvprintw(BOX_H + 6, 1, "Enter note: ");
+        getnstr(note, sizeof(note) - 1);
+    }
 
     FILE *file = fopen("notes.txt", "a");
     if (file) {
@@ -95,10 +107,14 @@ void addNotes() {
         fclose(file);
     }
 
-    mvprintw(BOX_H + 7, 1, "Saved! [press any key]");
-    noecho();
-    curs_set(0);
-    getch();
+    if (flag == NULL) {
+        mvprintw(BOX_H + 7, 1, "Saved! [press any key]");
+        noecho();
+        curs_set(0);
+        getch();
+    } else {
+        printf("Note saved via command line!\n");
+    }
 }
 
 void clearNotes() {

@@ -5,8 +5,8 @@ TARGET = cnote
 
 all: $(TARGET)
 
-$(TARGET): main.c
-	$(CC) $(CFLAGS) main.c -o $(TARGET) $(LIBS)
+$(TARGET): cnote.c
+	$(CC) $(CFLAGS) cnote.c -o $(TARGET) $(LIBS)
 
 clean: 
 	rm -f $(TARGET)
