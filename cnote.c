@@ -9,14 +9,24 @@
 #define BOX_H 10
 
 void addNotes(char *flag);
-void viewNotes();
+void displayNotes();
 void clearNotes();
+
+void viewNotes();
 
 int main(int argc, char **argv) {
     int opt = 0;
     
-    while ((opt = getopt(argc, argv, "a:")) != -1) {
-        addNotes(optarg);
+    while ((opt = getopt(argc, argv, "a:v")) != -1) {
+        switch (opt) {
+            case 'a':
+                addNotes(optarg);
+                break;
+            case 'v':
+                viewNotes();
+                break;
+                return 0;
+        }
         return 0;
     }
 
@@ -35,7 +45,7 @@ int main(int argc, char **argv) {
         mvprintw(0, 40, " Cnote ");
         attroff(A_DIM);
 
-        viewNotes();
+        displayNotes();
 
         mvprintw(BOX_H + 5, 1, "[1]Add [2]Refresh [3]Clear [4]Exit");
         mvprintw(BOX_H + 10, 1, "Choice: ");
@@ -69,7 +79,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void viewNotes() {
+void displayNotes() {
     FILE *file = fopen("notes.txt", "r");
     if (!file) {
         mvprintw(2, 5, "No notes found...");
@@ -83,6 +93,21 @@ void viewNotes() {
         line[strcspn(line, "\n")] = 0;
         mvprintw(row++, 1, "%.55s", line);
     }
+    fclose(file);
+}
+
+void viewNotes() {
+    FILE *file = fopen("notes.txt", "r");
+    if (!file) {
+        printf("No notes found.\n");
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line);
+    }
+
     fclose(file);
 }
 
