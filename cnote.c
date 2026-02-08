@@ -8,24 +8,32 @@
 #define BOX_W 60
 #define BOX_H 10
 
-void addNotes(char *flag);
-void displayNotes();
+// TUI Functions
+void viewNotes();
+void addNotes();
 void clearNotes();
 
-void viewNotes();
+// CLI Functions
+void flagAdd(char *flag);
+void flagView();
+void flagClear();
 
+// Driver
 int main(int argc, char **argv) {
     int opt = 0;
     
-    while ((opt = getopt(argc, argv, "a:v")) != -1) {
+    while ((opt = getopt(argc, argv, "a:vc")) != -1) {
         switch (opt) {
             case 'a':
-                addNotes(optarg);
+                flagAdd(optarg);
                 break;
             case 'v':
-                viewNotes();
+                flagView();
                 break;
                 return 0;
+            case 'c':
+                flagClear();
+                break;
         }
         return 0;
     }
@@ -45,9 +53,9 @@ int main(int argc, char **argv) {
         mvprintw(0, 40, " Cnote ");
         attroff(A_DIM);
 
-        displayNotes();
+        viewNotes();
 
-        mvprintw(BOX_H + 5, 1, "[1]Add [2]Refresh [3]Clear [4]Exit");
+        mvprintw(BOX_H + 5, 1, "[1]Add [3]Clear [4]Exit");
         mvprintw(BOX_H + 10, 1, "Choice: ");
         refresh();
 
@@ -60,18 +68,16 @@ int main(int argc, char **argv) {
 
         switch (choice) {
             case 1:
-                addNotes(NULL);
+                addNotes();
                 break;
             case 2:
-                break;
-            case 3:
                 clearNotes();
                 break;
-            case 4:
+            case 3:
                 printf("Closing...\n");
                 break;
             default:
-                printf("Invalid choice\n");
+                printf("Invalid choice.\n");
         }
     }while (choice < 4 && choice > 0);
 
@@ -79,7 +85,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void displayNotes() {
+void viewNotes() {
     FILE *file = fopen("notes.txt", "r");
     if (!file) {
         mvprintw(2, 5, "No notes found...");
@@ -96,7 +102,60 @@ void displayNotes() {
     fclose(file);
 }
 
-void viewNotes() {
+void addNotes() {
+    char note[100];
+    
+    echo();
+    curs_set(1);
+    mvprintw(BOX_H + 6, 1, "Enter note: ");
+    getnstr(note, sizeof(note) - 1);
+
+    FILE *file = fopen("notes.txt", "a");
+    if (file) {
+        time_t now = time(NULL);
+        char *date = ctime(&now);
+        date[strlen(date) - 1] = '\0';
+        fprintf(file, "[%s] %s\n", date, note);
+        
+        fclose(file);
+
+        mvprintw(BOX_H + 7, 1, "Saved! [press any key]");
+        noecho();
+        curs_set(0);
+        getch();
+    }
+}
+
+void clearNotes() {
+    mvprintw(BOX_H + 6, 1, "Clear all notes? [y/n]: ");
+    int ch = getch();
+    if (ch == 'y' || ch == 'Y') {
+        FILE *file = fopen("notes.txt", "w");
+        if (file) fclose(file);
+        mvprintw(BOX_H + 7, 1, "Cleared! [press any key]");
+    }
+    getch();
+}
+
+void flagAdd(char *flag) {
+    char note[100];
+
+    if (flag != NULL) {
+        strncpy(note, flag, sizeof(note) - 1);
+        FILE *file = fopen("notes.txt", "a");
+        if (file) {
+            time_t now = time(NULL);
+            char *date = ctime(&now);
+            date[strlen(date) - 1] = '\0';
+            fprintf(file, "[%s] %s\n", date, note);
+
+            fclose(file);
+            printf("Note saved via command line!\n");
+        }
+    }
+}
+
+void flagView() {
     FILE *file = fopen("notes.txt", "r");
     if (!file) {
         printf("No notes found.\n");
@@ -111,44 +170,12 @@ void viewNotes() {
     fclose(file);
 }
 
-void addNotes(char *flag) {
-    char note[100];
-    
-    if (flag != NULL) {
-        strncpy(note, flag, sizeof(note) - 1);
+void flagClear() {
+    FILE *file = fopen("notes.txt", "w");
+    if (!file) {
+        printf("No notes to clear.\n");
     } else {
-        echo();
-        curs_set(1);
-        mvprintw(BOX_H + 6, 1, "Enter note: ");
-        getnstr(note, sizeof(note) - 1);
+        printf("Notes cleared via command line!\n");
     }
-
-    FILE *file = fopen("notes.txt", "a");
-    if (file) {
-        time_t now = time(NULL);
-        char *date = ctime(&now);
-        date[strlen(date) - 1] = '\0';
-        fprintf(file, "[%s] %s\n", date, note);
-        fclose(file);
-    }
-
-    if (flag == NULL) {
-        mvprintw(BOX_H + 7, 1, "Saved! [press any key]");
-        noecho();
-        curs_set(0);
-        getch();
-    } else {
-        printf("Note saved via command line!\n");
-    }
-}
-
-void clearNotes() {
-    mvprintw(BOX_H + 6, 1, "Clear all notes? [y/n]: ");
-    int ch = getch();
-    if (ch == 'y' || ch == 'Y') {
-        FILE *file = fopen("notes.txt", "w");
-        if (file) fclose(file);
-        mvprintw(BOX_H + 7, 1, "Cleared! [press any key]");
-    }
-    getch();
+    fclose(file);
 }
