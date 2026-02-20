@@ -25,7 +25,12 @@ void flagAdd(char *flag) {
 void flagView() {
     FILE *file = fopen("notes.txt", "r");
     if (!file) {
-        printf("No notes found.\n");
+        printf("notes.txt found.\n");
+        return;
+    }
+    int text = fgetc(file);
+    if (text == EOF) {
+        printf("No notes taken.\n");
         return;
     }
 

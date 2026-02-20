@@ -1,12 +1,5 @@
-CC = gcc
-CFLAGS = -Wall -Wextra
-LIBS = -lncurses
-TARGET = cnote
+syz: cnote.c
+	gcc -o cnote cnote.c
 
-all: $(TARGET)
-
-$(TARGET): cnote.c flags.c
-	$(CC) $(CFLAGS) cnote.c flags.c -o $(TARGET) $(LIBS)
-
-clean: 
-	rm -f $(TARGET)
+clean:
+	rm cnote
